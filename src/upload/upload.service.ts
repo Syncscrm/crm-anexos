@@ -4,7 +4,8 @@ import { promises as fs } from 'fs';
 
 @Injectable()
 export class UploadService {
-  private readonly uploadPath = join(__dirname, '..', '..', 'uploads');
+  // Atualizando o caminho para a pasta 'uploads' fora da pasta do projeto
+  private readonly uploadPath = join(__dirname, '..', '..', '..', 'uploads');
 
   constructor() {
     this.ensureUploadsFolderExists();
@@ -27,11 +28,15 @@ export class UploadService {
     return filePath;
   }
 
+  
+
   async getFile(fileName: string): Promise<Buffer> {
     const filePath = join(this.uploadPath, fileName);
     console.log(`Reading file: ${filePath}`);
     return fs.readFile(filePath);
   }
+
+  
 
   async listFiles(): Promise<string[]> {
     console.log(`Listing files in directory: ${this.uploadPath}`);
@@ -63,7 +68,7 @@ export class UploadService {
       await fs.unlink(filePath);
       console.log(`File deleted: ${filePath}`);
     } catch (error) {
-      console.error(`Error deleting file: ${fileName}`);
+      console.error(`Failed to delete file: ${filePath}`);
       throw error;
     }
   }

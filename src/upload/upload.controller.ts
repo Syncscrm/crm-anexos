@@ -1,10 +1,10 @@
-import { Controller, Post, UploadedFile, UseInterceptors, Get, Param, Res, Delete, Query } from '@nestjs/common';
+import { Controller, Post, UploadedFile, UseInterceptors, Get, Param, Res, Query, Delete } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UploadService } from './upload.service';
 import { Response } from 'express';
 import { Express } from 'express';
 
-@Controller('upload')
+@Controller('uploads')
 export class UploadController {
   constructor(private readonly uploadService: UploadService) {}
 
@@ -15,11 +15,18 @@ export class UploadController {
     return { filePath };
   }
 
-  @Get(':fileName')
-  async getFile(@Param('fileName') fileName: string, @Res() res: Response) {
-    const file = await this.uploadService.getFile(fileName);
-    res.send(file);
+
+  @Get(':fileName') // Endpoint para baixar arquivos
+  async downloadFile(@Param('fileName') fileName: string, @Res() res: Response) {
+    try {
+      const file = await this.uploadService.getFile(fileName);
+      res.send(file);
+    } catch (error) {
+      res.status(404).json({ message: 'File not found', error: error.message });
+    }
   }
+
+
 
   @Get('list')
   async listFiles(@Res() res: Response) {

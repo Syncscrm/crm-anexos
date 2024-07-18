@@ -7,7 +7,8 @@ import * as express from 'express';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   
-  const uploadPath = join(__dirname, '..', '..', 'uploads');
+  // Atualizando o caminho para a pasta 'uploads' fora da pasta do projeto
+  const uploadPath = join(__dirname, '..', '..', '..', 'uploads');
   if (!existsSync(uploadPath)) {
     mkdirSync(uploadPath, { recursive: true });
     console.log(`Created directory: ${uploadPath}`);
@@ -19,7 +20,7 @@ async function bootstrap() {
   app.use('/uploads', express.static(uploadPath));
 
   app.enableCors();
-  await app.listen(3002);
-  console.log('Server is listening on port 3002');
+  await app.listen(3000);
+  console.log('Server is listening on port 3000');
 }
 bootstrap();
