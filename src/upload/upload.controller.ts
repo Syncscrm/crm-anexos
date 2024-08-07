@@ -1,4 +1,7 @@
-import { Controller, Post, UploadedFile, UseInterceptors, Get, Param, Res, Query, Delete } from '@nestjs/common';
+
+
+
+import { Controller, Post, UploadedFile, UseInterceptors, Get, Param, Res, Query, Delete, Body } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UploadService } from './upload.service';
 import { Response } from 'express';
@@ -10,48 +13,69 @@ export class UploadController {
 
   @Post()
   @UseInterceptors(FileInterceptor('file'))
-  async uploadFile(@UploadedFile() file: Express.Multer.File) {
-    const filePath = await this.uploadService.saveFile(file);
+  async uploadFile(
+    @UploadedFile() file: Express.Multer.File,
+    @Body('empresaId') empresaId: string,
+    @Body('empresaName') empresaName: string,
+    @Body('cardId') cardId: string,
+    @Body('userId') userId: string,
+    @Body('clientName') clientName: string,
+  ) {
+    const filePath = await this.uploadService.saveFile(file, empresaId, empresaName, cardId, userId, clientName);
     return { filePath };
   }
 
 
-  @Get(':fileName') // Endpoint para baixar arquivos
-  async downloadFile(@Param('fileName') fileName: string, @Res() res: Response) {
+
+
+
+  @Get(':fileName')
+  async downloadFile(
+    @Param('fileName') fileName: string,
+    @Query('empresaId') empresaId: string,
+    @Query('cardId') cardId: string,
+    @Query('userId') userId: string,
+    @Query('clientName') clientName: string,
+    @Res() res: Response
+  ) {
     try {
-      const file = await this.uploadService.getFile(fileName);
-      res.send(file);
+      if (!empresaId || !cardId || !userId || !clientName) {
+        throw new Error('Missing required parameters');
+      }
+      const filePath = await this.uploadService.getFilePath(empresaId, cardId, userId, clientName, fileName);
+      res.sendFile(filePath);
     } catch (error) {
       res.status(404).json({ message: 'File not found', error: error.message });
     }
   }
+  
 
 
 
   @Get('list')
-  async listFiles(@Res() res: Response) {
+  async listFiles(
+    @Query('empresaId') empresaId: string,
+    @Res() res: Response
+  ) {
     try {
-      const files = await this.uploadService.listFiles();
+      const files = await this.uploadService.listFiles(empresaId);
       res.status(200).json(files);
     } catch (error) {
       res.status(500).json({ message: 'Failed to list files', error: error.message });
     }
   }
 
-  @Get('find')
-  async findFile(@Query('name') fileName: string, @Res() res: Response) {
-    try {
-      const filePath = await this.uploadService.findFile(fileName);
-      res.status(200).json({ filePath });
-    } catch (error) {
-      res.status(404).json({ message: 'File not found', error: error.message });
-    }
-  }
-
   @Delete(':fileName')
-  async deleteFile(@Param('fileName') fileName: string, @Res() res: Response) {
+  async deleteFile(
+    @Param('fileName') fileName: string,
+    @Query('empresaId') empresaId: string,
+    @Query('cardId') cardId: string,
+    @Query('userId') userId: string,
+    @Query('clientName') clientName: string,
+    @Res() res: Response
+  ) {
     try {
-      await this.uploadService.deleteFile(fileName);
+      await this.uploadService.deleteFile(empresaId, cardId, userId, clientName, fileName);
       res.status(200).json({ message: 'File deleted successfully' });
     } catch (error) {
       res.status(500).json({ message: 'Failed to delete file', error: error.message });
