@@ -1,5 +1,3 @@
-
-
 import { Injectable } from '@nestjs/common';
 import { join, resolve } from 'path';
 import { promises as fs } from 'fs';
@@ -15,10 +13,8 @@ export class UploadService {
   private async ensureUploadsFolderExists() {
     try {
       await fs.access(this.uploadPath);
-      console.log(`Upload directory exists: ${this.uploadPath}`);
     } catch (error) {
       await fs.mkdir(this.uploadPath, { recursive: true });
-      console.log(`Created upload directory: ${this.uploadPath}`);
     }
   }
 
@@ -92,21 +88,6 @@ export class UploadService {
     return null;
   }
 
-  // async saveFile(file: Express.Multer.File, empresaId: string, empresaName: string, cardId: string, userId: string, clientName: string): Promise<string> {
-  //   const empresaFolderPath = await this.updateEmpresaFolderName(empresaId, empresaName) || await this.getEmpresaFolderPath(empresaId) || join(this.uploadPath, `EMPRESA-ID${empresaId}-${empresaName}`);
-  //   await this.ensureFolderExists(empresaFolderPath);
-
-  //   let cardFolderPath = await this.updateClientFolderName(empresaFolderPath, cardId, clientName);
-  //   if (!cardFolderPath) {
-  //     cardFolderPath = await this.getCardFolderPath(empresaId, empresaName, cardId, userId, clientName);
-  //   }
-
-  //   const filePath = join(cardFolderPath, file.originalname);
-  //   await fs.writeFile(filePath, file.buffer);
-  //   console.log(`File saved: ${filePath}`);
-  //   return filePath;
-  // }
-
 
   async saveFile(file: Express.Multer.File, empresaId: string, empresaName: string, cardId: string, userId: string, clientName: string): Promise<string> {
     let empresaFolderPath = await this.updateEmpresaFolderName(empresaId, empresaName) || await this.getEmpresaFolderPath(empresaId) || join(this.uploadPath, `EMPRESA-ID${empresaId}-${empresaName}`);
@@ -119,25 +100,11 @@ export class UploadService {
 
     const filePath = join(cardFolderPath, file.originalname);
     await fs.writeFile(filePath, file.buffer);
-    console.log(`File saved: ${filePath}`);
     return filePath;
   }
 
 
 
-
-
-  // async getFilePath(empresaId: string, cardId: string, userId: string, clientName: string, fileName: string): Promise<string> {
-  //   const empresaFolderPath = await this.getEmpresaFolderPath(empresaId);
-  //   console.log(`Empresa folder path: ${empresaFolderPath}`);
-
-  //   const cardFolderPath = await this.updateClientFolderName(empresaFolderPath, cardId, clientName) || 
-  //     await this.getCardFolderPath(empresaId, '', cardId, userId, clientName);
-
-  //   const filePath = join(cardFolderPath, fileName);
-  //   console.log(`Reading file: ${filePath}`);
-  //   return filePath;
-  // }
   async getFilePath(empresaId: string, cardId: string, userId: string, clientName: string, fileName: string): Promise<string> {
     if (!empresaId || !cardId || !userId || !clientName) {
       throw new Error('Missing required parameters');
@@ -165,7 +132,6 @@ export class UploadService {
   
     // Construir o caminho completo do arquivo
     const filePath = resolve(cardFolderPath, fileName);
-    console.log(`Reading file: ${filePath}`);
     return filePath;
   }
 
@@ -175,10 +141,8 @@ export class UploadService {
 
   async listFiles(empresaId: string): Promise<string[]> {
     const empresaFolderPath = await this.getEmpresaFolderPath(empresaId);
-    console.log(`Listing files in directory: ${empresaFolderPath}`);
     try {
       const files = await fs.readdir(empresaFolderPath);
-      console.log(`Files found: ${files}`);
       return files;
     } catch (error) {
       console.error(`Error listing files: ${error.message}`);
@@ -192,9 +156,7 @@ export class UploadService {
     const filePath = join(cardFolderPath, fileName);
     try {
       await fs.unlink(filePath);
-      console.log(`File deleted: ${filePath}`);
     } catch (error) {
-      console.error(`Failed to delete file: ${filePath}`);
       throw error;
     }
   }
